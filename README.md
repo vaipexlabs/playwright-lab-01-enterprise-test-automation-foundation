@@ -1,0 +1,93 @@
+# Vaipex Playwright Enterprise Test Automation Foundation
+
+An open reference implementation for building reliable, maintainable, and
+operable browser automation with Playwright and Python. It provides a supported
+foundation that development and quality engineering teams can adopt, extend,
+and run consistently from a workstation or continuous integration pipeline.
+
+Developed by **Vaipex Labs** for the developer and quality engineering
+communities.
+
+![Focus](https://img.shields.io/badge/Focus-Test%20Automation-6D42E8)
+![Playwright](https://img.shields.io/badge/Playwright-Python-2EAD33?logo=playwright&logoColor=white)
+![Test Runner](https://img.shields.io/badge/Test%20Runner-pytest-0A9EDC?logo=pytest&logoColor=white)
+![License](https://img.shields.io/badge/License-Apache%202.0-blue)
+
+[Project Intent](#project-intent) ·
+[Target Experience](#target-experience) ·
+[Delivery Roadmap](#delivery-roadmap) ·
+[Planned Toolchain](#planned-toolchain) ·
+[Contributing](#contributing)
+
+## Project Intent
+
+Browser tests often begin as isolated scripts and become difficult to operate
+as the suite grows. This project demonstrates how to provide Playwright as an
+engineering capability with consistent structure, configuration, execution,
+evidence, and quality controls.
+
+The completed reference implementation will demonstrate:
+
+- A maintainable Python and Pytest project structure.
+- Reusable browser, context, configuration, and test-data fixtures.
+- Reliable locators and web-first assertions.
+- Page and component abstractions that preserve test intent.
+- Authentication-state reuse without committing credentials.
+- Parallel-safe tests with deterministic setup and cleanup.
+- Failure evidence through traces, screenshots, video, and reports.
+- Consistent local and GitHub Actions execution.
+- A concise two-minute demonstration for adopters.
+
+## Target Experience
+
+The intended developer journey is:
+
+```text
+Clone repository
+      ↓
+Install the supported toolchain
+      ↓
+Run one command
+      ↓
+Execute isolated browser journeys
+      ↓
+Inspect results and failure evidence
+      ↓
+Apply the same quality gate in CI
+```
+
+## Delivery Roadmap
+
+- [x] Establish repository purpose, licensing, and contribution baseline.
+- [ ] Add the pinned Python and Playwright toolchain.
+- [ ] Implement the first deterministic browser journey.
+- [ ] Introduce reusable configuration, fixtures, and page abstractions.
+- [ ] Add authentication, test-data, and parallel-execution patterns.
+- [ ] Produce reports, traces, screenshots, and failure evidence.
+- [ ] Add continuous integration and enforceable quality gates.
+- [ ] Publish the two-minute demo and operating guidance.
+
+Each milestone is intentionally small and independently reviewable.
+
+## Planned Toolchain
+
+| Tool | Role |
+| --- | --- |
+| Python | Automation language |
+| Playwright for Python | Browser automation across Chromium, Firefox, and WebKit |
+| Pytest | Test runner, fixtures, markers, and assertions |
+| pytest-xdist | Parallel test execution |
+| Ruff | Python linting and formatting |
+| Allure | Human-readable test reporting |
+| GitHub Actions | Repeatable continuous test execution |
+
+Tool versions and installation commands will be introduced with the next
+milestone rather than assumed by this foundation.
+
+## Contributing
+
+Community contributions are welcome. Keep changes portable, deterministic,
+secure by default, and understandable to teams adopting the reference
+implementation.
+
+Licensed under the [Apache License 2.0](LICENSE).

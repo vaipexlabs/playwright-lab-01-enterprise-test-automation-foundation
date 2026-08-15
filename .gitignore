@@ -1,0 +1,48 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Python environments and packaging
+.venv/
+venv/
+env/
+dist/
+build/
+*.egg-info/
+
+# Playwright and test evidence
+test-results/
+playwright-report/
+blob-report/
+allure-results/
+allure-report/
+screenshots/
+traces/
+videos/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+auth-state.json
+*.pem
+*.key
+
+# Editors and operating systems
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Generated output
+artifacts/
+reports/
+*.log
