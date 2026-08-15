@@ -104,7 +104,21 @@ browser:
 Execute the first complete Playwright journey with one command:
 
 ```bash
+# Fast headless execution
 ./scripts/test-e2e.sh
+
+# Watch the browser execute each step
+./scripts/test-e2e.sh --headed
+
+# Pause and inspect the journey with Playwright Inspector
+./scripts/test-e2e.sh --debug
+```
+
+Headed mode uses a 500 ms delay between Playwright operations so the journey is
+easy to follow. Override it when needed, for example:
+
+```bash
+PLAYWRIGHT_SLOW_MO=1000 ./scripts/test-e2e.sh --headed
 ```
 
 The command installs the pinned Chromium build when necessary, starts Vaipex
