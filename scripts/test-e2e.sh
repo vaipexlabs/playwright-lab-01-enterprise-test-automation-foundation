@@ -40,10 +40,6 @@ case "${MODE}" in
     ;;
 esac
 
-if [[ ! -x "${REPOSITORY_ROOT}/.venv/bin/pytest" ]]; then
-  "${REPOSITORY_ROOT}/scripts/setup.sh"
-fi
-
 "${REPOSITORY_ROOT}/scripts/install-browsers.sh"
 mkdir -p "${REPORT_DIRECTORY}" "${ARTIFACT_DIRECTORY}"
 

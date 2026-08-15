@@ -7,10 +7,6 @@ RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
 ARTIFACT_DIRECTORY="${REPOSITORY_ROOT}/artifacts/failure-demo/${RUN_ID}"
 REPORT_DIRECTORY="${REPOSITORY_ROOT}/reports/failure-demo/${RUN_ID}"
 
-if [[ ! -x "${REPOSITORY_ROOT}/.venv/bin/pytest" ]]; then
-  "${REPOSITORY_ROOT}/scripts/setup.sh"
-fi
-
 "${REPOSITORY_ROOT}/scripts/install-browsers.sh"
 mkdir -p "${ARTIFACT_DIRECTORY}" "${REPORT_DIRECTORY}"
 

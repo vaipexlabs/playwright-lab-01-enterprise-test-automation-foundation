@@ -21,6 +21,16 @@ if [[ ! -x "${VIRTUAL_ENVIRONMENT}/bin/python" ]]; then
   python3 -m venv "${VIRTUAL_ENVIRONMENT}"
 fi
 
+virtual_environment_version="$(
+  "${VIRTUAL_ENVIRONMENT}/bin/python" -c \
+    'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'
+)"
+if [[ "${virtual_environment_version}" != "3.12" ]]; then
+  echo "The existing .venv uses Python ${virtual_environment_version}; Python 3.12 is required." >&2
+  echo "Remove .venv and rerun ./scripts/setup.sh." >&2
+  exit 1
+fi
+
 echo "Installing the pinned project toolchain..."
 "${VIRTUAL_ENVIRONMENT}/bin/python" -m pip install --quiet --upgrade "pip==26.2.1"
 "${VIRTUAL_ENVIRONMENT}/bin/python" -m pip install --quiet \
@@ -28,5 +38,7 @@ echo "Installing the pinned project toolchain..."
 "${VIRTUAL_ENVIRONMENT}/bin/python" -m pip install --quiet \
   --no-deps \
   --editable "${REPOSITORY_ROOT}"
+cp "${REPOSITORY_ROOT}/requirements.lock" \
+  "${VIRTUAL_ENVIRONMENT}/.requirements.lock"
 
 echo "Toolchain ready: ${VIRTUAL_ENVIRONMENT}"

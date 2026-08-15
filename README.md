@@ -86,7 +86,8 @@ Python 3.12 is required. Start the complete application with:
 ```
 
 The first run creates `.venv` and installs the complete dependency set pinned
-in `requirements.lock`. Open [http://127.0.0.1:8000](http://127.0.0.1:8000) and use:
+in `requirements.lock`. Later commands automatically reconcile `.venv` whenever
+that lock changes. Open [http://127.0.0.1:8000](http://127.0.0.1:8000) and use:
 
 ```text
 Email:    demo@vaipex.io
