@@ -19,6 +19,7 @@ communities.
 [Run Locally](#run-locally) ·
 [Run the Browser Journey](#run-the-browser-journey) ·
 [Test Architecture](#test-architecture) ·
+[Failure Evidence](#failure-evidence) ·
 [Delivery Roadmap](#delivery-roadmap) ·
 [Toolchain](#toolchain) ·
 [Contributing](#contributing)
@@ -137,6 +138,12 @@ application automatically. Change concurrency without editing code:
 PLAYWRIGHT_WORKERS=4 ./scripts/test-e2e.sh
 ```
 
+Every normal run writes:
+
+- A self-contained report to `reports/playwright.html`.
+- A machine-readable report to `reports/junit.xml`.
+- Failure-only browser evidence beneath `artifacts/playwright/`.
+
 ## Test Architecture
 
 The browser suite separates business intent from UI mechanics and environment
@@ -195,6 +202,37 @@ Supported configuration:
 | `VAIPEX_SHIPPING_CITY` | `Cloud City` | Checkout city |
 | `VAIPEX_SHIPPING_POSTAL_CODE` | `10001` | Checkout postal code |
 
+## Failure Evidence
+
+Playwright retains diagnostics only when a browser test fails:
+
+| Evidence | Purpose |
+| --- | --- |
+| Screenshot (`.png`) | Show the browser's final visible state |
+| Trace (`.zip`) | Replay actions, DOM snapshots, console, network, and timing |
+| Video (`.webm`) | Show the complete failed browser journey |
+| HTML report | Provide a human-readable suite result |
+| JUnit XML | Integrate results with CI and quality systems |
+
+Prove the behavior safely with:
+
+```bash
+./scripts/demonstrate-failure.sh
+```
+
+The script runs one intentionally incorrect assertion. It succeeds only when
+the expected test failure produces all five forms of evidence, and stores that
+run beneath timestamped `artifacts/failure-demo/` and
+`reports/failure-demo/` directories.
+
+Open the latest HTML report in a browser, or inspect a trace with:
+
+```bash
+.venv/bin/playwright show-trace path/to/trace.zip
+```
+
+Generated reports and browser evidence are ignored by Git.
+
 ## Delivery Roadmap
 
 - [x] Establish repository purpose, licensing, and contribution baseline.
@@ -203,7 +241,7 @@ Supported configuration:
 - [x] Implement the first deterministic browser journey.
 - [x] Introduce reusable configuration, fixtures, and page abstractions.
 - [x] Add authentication, test-data, and parallel-execution patterns.
-- [ ] Produce reports, traces, screenshots, and failure evidence.
+- [x] Produce reports, traces, screenshots, and failure evidence.
 - [ ] Add continuous integration and enforceable quality gates.
 - [ ] Publish the two-minute demo and operating guidance.
 
@@ -218,7 +256,7 @@ Each milestone is intentionally small and independently reviewable.
 | Pytest | Test runner, fixtures, markers, and assertions |
 | pytest-xdist | Parallel test execution |
 | Ruff | Python linting and formatting |
-| Allure | Human-readable test reporting |
+| pytest-html and JUnit XML | Human-readable and machine-readable test reporting |
 | GitHub Actions | Repeatable continuous test execution |
 
 Direct dependencies are declared in `pyproject.toml`; the complete transitive
@@ -229,6 +267,8 @@ environment is pinned in `requirements.lock`.
 ```text
 src/vaipex_store/   FastAPI routes, templates, and application styling
 scripts/            Reproducible setup and local startup commands
+artifacts/          Generated failure screenshots, traces, and videos (ignored)
+reports/            Generated HTML and JUnit reports (ignored)
 tests/unit/         Fast application-contract tests
 tests/e2e/          Business-readable Playwright browser journeys
 tests/pages/        Reusable page interactions and UI assertions

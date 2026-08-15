@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from pathlib import Path
 
 import pytest
-from playwright.sync_api import Browser, Page
+from playwright.sync_api import Browser, BrowserContext, Page
 
 from tests.config import AutomationSettings, Credentials, ShippingAddress
 from tests.data import ScenarioDataFactory
@@ -50,11 +50,11 @@ def authenticated_state(
 
 @pytest.fixture
 def authenticated_page(
-    browser: Browser,
+    new_context: Callable[..., BrowserContext],
     authenticated_state: Path,
     settings: AutomationSettings,
 ) -> Generator[Page]:
-    context = browser.new_context(storage_state=authenticated_state)
+    context = new_context(storage_state=authenticated_state)
     page = context.new_page()
     page.set_default_timeout(settings.timeout_ms)
     page.set_default_navigation_timeout(settings.timeout_ms)

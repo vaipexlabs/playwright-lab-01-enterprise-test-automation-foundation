@@ -4,7 +4,20 @@ set -euo pipefail
 
 REPOSITORY_ROOT="$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)"
 MODE="${1:-headless}"
-PYTEST_ARGUMENTS=(tests/e2e --browser chromium)
+REPORT_DIRECTORY="${REPOSITORY_ROOT}/reports"
+ARTIFACT_DIRECTORY="${REPOSITORY_ROOT}/artifacts/playwright"
+PYTEST_ARGUMENTS=(
+  tests/e2e
+  -m "not evidence_demo"
+  --browser chromium
+  --output "${ARTIFACT_DIRECTORY}"
+  --tracing retain-on-failure
+  --screenshot only-on-failure
+  --video retain-on-failure
+  --html "${REPORT_DIRECTORY}/playwright.html"
+  --self-contained-html
+  --junitxml "${REPORT_DIRECTORY}/junit.xml"
+)
 
 case "${MODE}" in
   headless)
@@ -32,7 +45,14 @@ if [[ ! -x "${REPOSITORY_ROOT}/.venv/bin/pytest" ]]; then
 fi
 
 "${REPOSITORY_ROOT}/scripts/install-browsers.sh"
+mkdir -p "${REPORT_DIRECTORY}" "${ARTIFACT_DIRECTORY}"
 
 echo "Running the Vaipex Store browser journeys (${MODE#--})..."
 cd "${REPOSITORY_ROOT}"
 "${REPOSITORY_ROOT}/.venv/bin/pytest" "${PYTEST_ARGUMENTS[@]}"
+
+echo
+echo "Reports:"
+echo "  HTML:  ${REPORT_DIRECTORY}/playwright.html"
+echo "  JUnit: ${REPORT_DIRECTORY}/junit.xml"
+echo "Failure artifacts: ${ARTIFACT_DIRECTORY}"
