@@ -36,6 +36,9 @@ vaipex_store = ["templates/*.html", "static/*.css"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --strict-markers"
+markers = [
+  "e2e: browser-based end-to-end tests",
+]
 testpaths = ["tests"]
 
 [tool.ruff]

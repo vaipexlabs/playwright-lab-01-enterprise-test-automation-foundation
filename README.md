@@ -17,6 +17,7 @@ communities.
 [Target Experience](#target-experience) ·
 [Reference Application](#reference-application) ·
 [Run Locally](#run-locally) ·
+[Run the Browser Journey](#run-the-browser-journey) ·
 [Delivery Roadmap](#delivery-roadmap) ·
 [Toolchain](#toolchain) ·
 [Contributing](#contributing)
@@ -98,12 +99,31 @@ browser:
 .venv/bin/ruff check .
 ```
 
+## Run the Browser Journey
+
+Execute the first complete Playwright journey with one command:
+
+```bash
+./scripts/test-e2e.sh
+```
+
+The command installs the pinned Chromium build when necessary, starts Vaipex
+Store on an available local port, resets deterministic state, and verifies:
+
+1. The unauthenticated user is directed to sign in.
+2. Valid credentials open the product catalog.
+3. The Developer Starter Kit can be added to the cart.
+4. Checkout captures the required shipping information.
+5. The application confirms order `VPX-1001` with the expected total.
+
+The application server is stopped automatically when the test session ends.
+
 ## Delivery Roadmap
 
 - [x] Establish repository purpose, licensing, and contribution baseline.
 - [x] Add the pinned Python and Playwright toolchain.
 - [x] Deliver the deterministic Vaipex Store reference application.
-- [ ] Implement the first deterministic browser journey.
+- [x] Implement the first deterministic browser journey.
 - [ ] Introduce reusable configuration, fixtures, and page abstractions.
 - [ ] Add authentication, test-data, and parallel-execution patterns.
 - [ ] Produce reports, traces, screenshots, and failure evidence.
@@ -133,6 +153,7 @@ environment is pinned in `requirements.lock`.
 src/vaipex_store/   FastAPI routes, templates, and application styling
 scripts/            Reproducible setup and local startup commands
 tests/unit/         Fast application-contract tests
+tests/e2e/          Playwright browser journeys and local server lifecycle
 pyproject.toml      Python package, dependency, Pytest, and Ruff configuration
 requirements.lock  Fully resolved runtime and test dependency versions
 ```
