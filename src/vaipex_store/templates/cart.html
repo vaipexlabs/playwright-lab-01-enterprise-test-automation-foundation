@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Cart · Vaipex Store{% endblock %}
+{% block content %}
+  <div class="section-heading">
+    <div><p class="eyebrow">Your selection</p><h1>Shopping cart</h1></div>
+    <a href="/products">Continue shopping</a>
+  </div>
+  {% if items %}
+    <div class="cart-layout">
+      <section class="panel" aria-label="Cart items">
+        {% for item in items %}
+          <article class="cart-item" data-testid="cart-item-{{ item.product.id }}">
+            <div>
+              <h2>{{ item.product.name }}</h2>
+              <p>Quantity: {{ item.quantity }}</p>
+            </div>
+            <div class="cart-item-action">
+              <strong>${{ "%.2f" | format(item.subtotal) }}</strong>
+              <form action="/cart/{{ item.product.id }}/remove" method="post">
+                <button class="link-button danger" type="submit">Remove</button>
+              </form>
+            </div>
+          </article>
+        {% endfor %}
+      </section>
+      <aside class="summary-card">
+        <h2>Order summary</h2>
+        <div class="summary-total"><span>Total</span><strong data-testid="cart-total">${{ "%.2f" | format(total) }}</strong></div>
+        <a class="button primary" href="/checkout">Proceed to checkout</a>
+      </aside>
+    </div>
+  {% else %}
+    <section class="empty-state">
+      <h2>Your cart is empty</h2>
+      <p>Add a product from the catalog to begin the checkout journey.</p>
+      <a class="button primary" href="/products">Browse products</a>
+    </section>
+  {% endif %}
+{% endblock %}

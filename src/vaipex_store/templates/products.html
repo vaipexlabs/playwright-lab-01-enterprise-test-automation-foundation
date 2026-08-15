@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Products · Vaipex Store{% endblock %}
+{% block content %}
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Built for engineering teams</p>
+      <h1>Practical resources for modern delivery</h1>
+      <p>Browse the deterministic catalog used by the Vaipex Playwright reference suite.</p>
+    </div>
+  </section>
+  <form class="search" action="/products" method="get" role="search">
+    <label for="product-search">Search products</label>
+    <div class="search-row">
+      <input id="product-search" name="q" value="{{ query }}" placeholder="Try Tooling or Platform">
+      <button type="submit">Search</button>
+    </div>
+  </form>
+  <section aria-labelledby="catalog-heading">
+    <div class="section-heading">
+      <h2 id="catalog-heading">Catalog</h2>
+      <span>{{ products | length }} products</span>
+    </div>
+    <div class="product-grid" data-testid="product-grid">
+      {% for product in products %}
+        <article class="product-card" data-testid="product-{{ product.id }}">
+          <span class="category">{{ product.category }}</span>
+          <h3>{{ product.name }}</h3>
+          <p>{{ product.description }}</p>
+          <div class="product-action">
+            <strong>${{ "%.2f" | format(product.price) }}</strong>
+            <form action="/cart/{{ product.id }}" method="post">
+              <button class="primary" type="submit">Add to cart</button>
+            </form>
+          </div>
+        </article>
+      {% else %}
+        <p class="empty-state">No products match “{{ query }}”.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

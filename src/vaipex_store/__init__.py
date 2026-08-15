@@ -1,0 +1,1 @@
+"""Vaipex Store reference application."""

@@ -15,8 +15,10 @@ communities.
 
 [Project Intent](#project-intent) ·
 [Target Experience](#target-experience) ·
+[Reference Application](#reference-application) ·
+[Run Locally](#run-locally) ·
 [Delivery Roadmap](#delivery-roadmap) ·
-[Planned Toolchain](#planned-toolchain) ·
+[Toolchain](#toolchain) ·
 [Contributing](#contributing)
 
 ## Project Intent
@@ -56,10 +58,51 @@ Inspect results and failure evidence
 Apply the same quality gate in CI
 ```
 
+## Reference Application
+
+The repository includes **Vaipex Store**, a compact FastAPI commerce
+application designed specifically for deterministic automation. It provides:
+
+- Demo authentication and session behavior.
+- A searchable product catalog.
+- Cart, checkout, and order-confirmation journeys.
+- Validation and unauthorized-access scenarios.
+- Health and catalog APIs.
+- A test-only state-reset API that is disabled unless test mode is explicit.
+- Accessible labels, semantic landmarks, and stable test attributes.
+
+Owning the test target keeps this reference implementation independent of
+external websites, rate limits, shared data, and unannounced UI changes.
+
+## Run Locally
+
+Python 3.12 is required. Start the complete application with:
+
+```bash
+./scripts/start-app.sh
+```
+
+The first run creates `.venv` and installs the complete dependency set pinned
+in `requirements.lock`. Open [http://127.0.0.1:8000](http://127.0.0.1:8000) and use:
+
+```text
+Email:    demo@vaipex.io
+Password: vaipex-demo
+```
+
+Stop the application with `Ctrl+C`. To validate the application without a
+browser:
+
+```bash
+.venv/bin/pytest tests/unit
+.venv/bin/ruff check .
+```
+
 ## Delivery Roadmap
 
 - [x] Establish repository purpose, licensing, and contribution baseline.
-- [ ] Add the pinned Python and Playwright toolchain.
+- [x] Add the pinned Python and Playwright toolchain.
+- [x] Deliver the deterministic Vaipex Store reference application.
 - [ ] Implement the first deterministic browser journey.
 - [ ] Introduce reusable configuration, fixtures, and page abstractions.
 - [ ] Add authentication, test-data, and parallel-execution patterns.
@@ -69,7 +112,7 @@ Apply the same quality gate in CI
 
 Each milestone is intentionally small and independently reviewable.
 
-## Planned Toolchain
+## Toolchain
 
 | Tool | Role |
 | --- | --- |
@@ -81,8 +124,18 @@ Each milestone is intentionally small and independently reviewable.
 | Allure | Human-readable test reporting |
 | GitHub Actions | Repeatable continuous test execution |
 
-Tool versions and installation commands will be introduced with the next
-milestone rather than assumed by this foundation.
+Direct dependencies are declared in `pyproject.toml`; the complete transitive
+environment is pinned in `requirements.lock`.
+
+## Repository Structure
+
+```text
+src/vaipex_store/   FastAPI routes, templates, and application styling
+scripts/            Reproducible setup and local startup commands
+tests/unit/         Fast application-contract tests
+pyproject.toml      Python package, dependency, Pytest, and Ruff configuration
+requirements.lock  Fully resolved runtime and test dependency versions
+```
 
 ## Contributing
 

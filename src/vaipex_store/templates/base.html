@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Vaipex Store{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/products" aria-label="Vaipex Store home">
+        <span class="brand-mark">V</span>
+        <span>Vaipex Store</span>
+      </a>
+      {% if request.session.get('user') %}
+        <nav aria-label="Primary navigation">
+          <a href="/products">Products</a>
+          <a href="/cart" data-testid="cart-link">Cart ({{ cart_count | default(0) }})</a>
+          <form action="/logout" method="post">
+            <button class="link-button" type="submit">Sign out</button>
+          </form>
+        </nav>
+      {% endif %}
+    </header>
+    <main class="page-shell">
+      {% block content %}{% endblock %}
+    </main>
+    <footer>Vaipex Labs · A deterministic application for automation engineering</footer>
+  </body>
+</html>
