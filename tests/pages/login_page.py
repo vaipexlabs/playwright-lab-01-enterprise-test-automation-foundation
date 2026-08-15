@@ -19,3 +19,6 @@ class LoginPage:
         self.page.get_by_label("Email").fill(user.email)
         self.page.get_by_label("Password").fill(user.password)
         self.page.get_by_role("button", name="Sign in").click()
+
+    def expect_error(self, message: str) -> None:
+        expect(self.page.get_by_role("alert")).to_have_text(message)

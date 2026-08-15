@@ -122,16 +122,20 @@ easy to follow. Override it when needed, for example:
 PLAYWRIGHT_SLOW_MO=1000 ./scripts/test-e2e.sh --headed
 ```
 
-The command installs the pinned Chromium build when necessary, starts Vaipex
-Store on an available local port, resets deterministic state, and verifies:
+The command installs the pinned Chromium build when necessary and runs four
+independent scenarios across two parallel workers:
 
-1. The unauthenticated user is directed to sign in.
-2. Valid credentials open the product catalog.
-3. The Developer Starter Kit can be added to the cart.
-4. Checkout captures the required shipping information.
-5. The application confirms order `VPX-1001` with the expected total.
+1. Invalid credentials are rejected with an actionable error.
+2. A complete sign-in, cart, and Starter Kit checkout succeeds.
+3. A previously authenticated customer can search the catalog.
+4. A previously authenticated customer can purchase the Field Guide.
 
-The application server is stopped automatically when the test session ends.
+Each worker starts an isolated application, resets its own state, and stops the
+application automatically. Change concurrency without editing code:
+
+```bash
+PLAYWRIGHT_WORKERS=4 ./scripts/test-e2e.sh
+```
 
 ## Test Architecture
 
@@ -156,7 +160,17 @@ Vaipex Store or a compatible target environment
 | `tests/e2e/conftest.py` | Start or connect to the application and reset test state |
 | `tests/pages/` | Encapsulate locators, interactions, and page-level assertions |
 | `tests/config.py` | Validate URLs, credentials, shipping data, and timeouts |
+| `tests/data.py` | Generate deterministic, worker-specific scenario data |
 | `tests/conftest.py` | Configure browser pages and reusable test-data fixtures |
+
+Authentication is performed once per worker. Playwright saves the resulting
+browser storage state in that worker's temporary directory, and authenticated
+tests create fresh contexts from it. Storage state is never written into the
+repository.
+
+Test data is derived from the worker ID and scenario name. Repeated runs remain
+predictable, while parallel workers receive distinct names, addresses, and
+postal codes.
 
 The defaults run entirely locally. A compatible environment can be selected
 without changing test code:
@@ -188,7 +202,7 @@ Supported configuration:
 - [x] Deliver the deterministic Vaipex Store reference application.
 - [x] Implement the first deterministic browser journey.
 - [x] Introduce reusable configuration, fixtures, and page abstractions.
-- [ ] Add authentication, test-data, and parallel-execution patterns.
+- [x] Add authentication, test-data, and parallel-execution patterns.
 - [ ] Produce reports, traces, screenshots, and failure evidence.
 - [ ] Add continuous integration and enforceable quality gates.
 - [ ] Publish the two-minute demo and operating guidance.
@@ -219,6 +233,7 @@ tests/unit/         Fast application-contract tests
 tests/e2e/          Business-readable Playwright browser journeys
 tests/pages/        Reusable page interactions and UI assertions
 tests/config.py     Validated environment and test-data configuration
+tests/data.py       Deterministic, parallel-safe scenario data
 tests/conftest.py   Shared browser and test-data fixtures
 pyproject.toml      Python package, dependency, Pytest, and Ruff configuration
 requirements.lock  Fully resolved runtime and test dependency versions

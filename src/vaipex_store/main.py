@@ -13,8 +13,8 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 PACKAGE_ROOT = Path(__file__).parent
-DEMO_EMAIL = "demo@vaipex.io"
-DEMO_PASSWORD = "vaipex-demo"
+DEMO_EMAIL = os.getenv("VAIPEX_DEMO_EMAIL", "demo@vaipex.io")
+DEMO_PASSWORD = os.getenv("VAIPEX_DEMO_PASSWORD", "vaipex-demo")
 
 
 @dataclass(frozen=True)

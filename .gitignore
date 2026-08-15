@@ -32,6 +32,7 @@ videos/
 .env.*
 !.env.example
 auth-state.json
+storage-state.json
 *.pem
 *.key
 

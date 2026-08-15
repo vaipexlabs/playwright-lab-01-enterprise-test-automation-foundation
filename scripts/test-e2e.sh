@@ -8,13 +8,18 @@ PYTEST_ARGUMENTS=(tests/e2e --browser chromium)
 
 case "${MODE}" in
   headless)
+    PYTEST_ARGUMENTS+=(--numprocesses "${PLAYWRIGHT_WORKERS:-2}")
     ;;
   --headed)
-    PYTEST_ARGUMENTS+=(--headed --slowmo "${PLAYWRIGHT_SLOW_MO:-500}")
+    PYTEST_ARGUMENTS+=(
+      --headed
+      --slowmo "${PLAYWRIGHT_SLOW_MO:-500}"
+      --numprocesses "${PLAYWRIGHT_WORKERS:-1}"
+    )
     ;;
   --debug)
     export PWDEBUG=1
-    PYTEST_ARGUMENTS+=(-s)
+    PYTEST_ARGUMENTS+=(-s --numprocesses 0)
     ;;
   *)
     echo "Usage: ./scripts/test-e2e.sh [--headed|--debug]" >&2
@@ -28,6 +33,6 @@ fi
 
 "${REPOSITORY_ROOT}/scripts/install-browsers.sh"
 
-echo "Running the Vaipex Store browser journey (${MODE#--})..."
+echo "Running the Vaipex Store browser journeys (${MODE#--})..."
 cd "${REPOSITORY_ROOT}"
 "${REPOSITORY_ROOT}/.venv/bin/pytest" "${PYTEST_ARGUMENTS[@]}"
