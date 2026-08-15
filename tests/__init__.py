@@ -1,0 +1,1 @@
+"""Vaipex Playwright test architecture."""

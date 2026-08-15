@@ -8,7 +8,7 @@
     <p>Thank you, {{ order.customer }}. Your deterministic test order is ready.</p>
     <dl class="order-details">
       <div><dt>Order number</dt><dd data-testid="order-id">{{ order.id }}</dd></div>
-      <div><dt>Total</dt><dd>${{ "%.2f" | format(order.total) }}</dd></div>
+      <div><dt>Total</dt><dd data-testid="order-total">${{ "%.2f" | format(order.total) }}</dd></div>
     </dl>
     <a class="button primary" href="/products">Return to catalog</a>
   </section>

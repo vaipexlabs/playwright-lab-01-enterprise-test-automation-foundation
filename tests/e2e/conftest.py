@@ -21,10 +21,13 @@ def available_port() -> int:
         return int(server_socket.getsockname()[1])
 
 
-def wait_until_ready(base_url: str, process: subprocess.Popen[str]) -> None:
+def wait_until_ready(
+    base_url: str,
+    process: subprocess.Popen[str] | None = None,
+) -> None:
     deadline = time.monotonic() + 15
     while time.monotonic() < deadline:
-        if process.poll() is not None:
+        if process is not None and process.poll() is not None:
             raise RuntimeError(
                 f"Vaipex Store stopped during startup with code {process.returncode}."
             )
@@ -34,11 +37,17 @@ def wait_until_ready(base_url: str, process: subprocess.Popen[str]) -> None:
                     return
         except (urllib.error.URLError, TimeoutError):
             time.sleep(0.1)
-    raise RuntimeError("Vaipex Store did not become ready within 15 seconds.")
+    raise RuntimeError(f"Vaipex Store at {base_url} did not become ready within 15 seconds.")
 
 
 @pytest.fixture(scope="session")
 def app_server() -> Generator[str]:
+    configured_base_url = os.getenv("VAIPEX_BASE_URL", "").strip().rstrip("/")
+    if configured_base_url:
+        wait_until_ready(configured_base_url)
+        yield configured_base_url
+        return
+
     port = available_port()
     base_url = f"http://127.0.0.1:{port}"
     environment = os.environ.copy()
@@ -85,7 +94,10 @@ def base_url(app_server: str) -> str:
 
 @pytest.fixture(autouse=True)
 def reset_application(app_server: str) -> None:
-    request = urllib.request.Request(f"{app_server}/api/test/reset", method="POST")
-    with urllib.request.urlopen(request, timeout=2) as response:
+    reset_request = urllib.request.Request(
+        f"{app_server}/api/test/reset",
+        method="POST",
+    )
+    with urllib.request.urlopen(reset_request, timeout=2) as response:
         if response.status != 200:
             raise RuntimeError("Vaipex Store test state could not be reset.")

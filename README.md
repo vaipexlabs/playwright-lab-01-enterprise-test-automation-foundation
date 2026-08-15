@@ -18,6 +18,7 @@ communities.
 [Reference Application](#reference-application) ·
 [Run Locally](#run-locally) ·
 [Run the Browser Journey](#run-the-browser-journey) ·
+[Test Architecture](#test-architecture) ·
 [Delivery Roadmap](#delivery-roadmap) ·
 [Toolchain](#toolchain) ·
 [Contributing](#contributing)
@@ -132,13 +133,61 @@ Store on an available local port, resets deterministic state, and verifies:
 
 The application server is stopped automatically when the test session ends.
 
+## Test Architecture
+
+The browser suite separates business intent from UI mechanics and environment
+operation:
+
+```text
+Business-readable test
+        ↓
+Page objects and web-first assertions
+        ↓
+Configured Playwright page
+        ↓
+Environment and lifecycle fixtures
+        ↓
+Vaipex Store or a compatible target environment
+```
+
+| Layer | Responsibility |
+| --- | --- |
+| `tests/e2e/` | Describe the customer outcome being validated |
+| `tests/e2e/conftest.py` | Start or connect to the application and reset test state |
+| `tests/pages/` | Encapsulate locators, interactions, and page-level assertions |
+| `tests/config.py` | Validate URLs, credentials, shipping data, and timeouts |
+| `tests/conftest.py` | Configure browser pages and reusable test-data fixtures |
+
+The defaults run entirely locally. A compatible environment can be selected
+without changing test code:
+
+```bash
+VAIPEX_BASE_URL=https://store.example.test \
+VAIPEX_DEMO_EMAIL=automation@example.test \
+VAIPEX_DEMO_PASSWORD='replace-me' \
+./scripts/test-e2e.sh
+```
+
+Supported configuration:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `VAIPEX_BASE_URL` | Dynamically started local app | Target environment |
+| `VAIPEX_EXPECT_TIMEOUT_MS` | `5000` | Assertion and navigation timeout |
+| `VAIPEX_DEMO_EMAIL` | `demo@vaipex.io` | Test-user identity |
+| `VAIPEX_DEMO_PASSWORD` | `vaipex-demo` | Test-user credential |
+| `VAIPEX_SHIPPING_NAME` | `Vaipex Developer` | Checkout recipient |
+| `VAIPEX_SHIPPING_STREET` | `100 Platform Way` | Checkout street |
+| `VAIPEX_SHIPPING_CITY` | `Cloud City` | Checkout city |
+| `VAIPEX_SHIPPING_POSTAL_CODE` | `10001` | Checkout postal code |
+
 ## Delivery Roadmap
 
 - [x] Establish repository purpose, licensing, and contribution baseline.
 - [x] Add the pinned Python and Playwright toolchain.
 - [x] Deliver the deterministic Vaipex Store reference application.
 - [x] Implement the first deterministic browser journey.
-- [ ] Introduce reusable configuration, fixtures, and page abstractions.
+- [x] Introduce reusable configuration, fixtures, and page abstractions.
 - [ ] Add authentication, test-data, and parallel-execution patterns.
 - [ ] Produce reports, traces, screenshots, and failure evidence.
 - [ ] Add continuous integration and enforceable quality gates.
@@ -167,7 +216,10 @@ environment is pinned in `requirements.lock`.
 src/vaipex_store/   FastAPI routes, templates, and application styling
 scripts/            Reproducible setup and local startup commands
 tests/unit/         Fast application-contract tests
-tests/e2e/          Playwright browser journeys and local server lifecycle
+tests/e2e/          Business-readable Playwright browser journeys
+tests/pages/        Reusable page interactions and UI assertions
+tests/config.py     Validated environment and test-data configuration
+tests/conftest.py   Shared browser and test-data fixtures
 pyproject.toml      Python package, dependency, Pytest, and Ruff configuration
 requirements.lock  Fully resolved runtime and test dependency versions
 ```

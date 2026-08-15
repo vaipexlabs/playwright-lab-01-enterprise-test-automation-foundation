@@ -1,39 +1,36 @@
-import re
-
 import pytest
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page
+
+from tests.config import AutomationSettings, Credentials, ShippingAddress
+from tests.pages.cart_page import CartPage
+from tests.pages.catalog_page import CatalogPage
+from tests.pages.checkout_page import CheckoutPage
+from tests.pages.login_page import LoginPage
+from tests.pages.order_confirmation_page import OrderConfirmationPage
 
 
 @pytest.mark.e2e
-def test_customer_can_complete_checkout(page: Page, base_url: str) -> None:
-    page.goto(base_url)
+def test_customer_can_complete_checkout(
+    configured_page: Page,
+    settings: AutomationSettings,
+    demo_user: Credentials,
+    shipping_address: ShippingAddress,
+) -> None:
+    login = LoginPage(configured_page, settings.base_url)
+    catalog = CatalogPage(configured_page)
+    cart = CartPage(configured_page)
+    checkout = CheckoutPage(configured_page)
+    confirmation = OrderConfirmationPage(configured_page)
 
-    expect(page).to_have_url(re.compile(r"/login$"))
-    expect(page.get_by_role("heading", name="Welcome to Vaipex Store")).to_be_visible()
+    login.open()
+    login.sign_in(demo_user)
 
-    page.get_by_label("Email").fill("demo@vaipex.io")
-    page.get_by_label("Password").fill("vaipex-demo")
-    page.get_by_role("button", name="Sign in").click()
+    catalog.expect_loaded()
+    catalog.add_product("Developer Starter Kit")
 
-    expect(page).to_have_url(re.compile(r"/products$"))
-    expect(
-        page.get_by_role("heading", name="Practical resources for modern delivery")
-    ).to_be_visible()
+    cart.expect_total("$49.00")
+    cart.proceed_to_checkout()
 
-    starter_kit = page.get_by_test_id("product-starter-kit")
-    expect(starter_kit).to_contain_text("Developer Starter Kit")
-    starter_kit.get_by_role("button", name="Add to cart").click()
+    checkout.submit(shipping_address)
 
-    expect(page).to_have_url(re.compile(r"/cart$"))
-    expect(page.get_by_test_id("cart-total")).to_have_text("$49.00")
-    page.get_by_role("link", name="Proceed to checkout").click()
-
-    page.get_by_label("Full name").fill("Vaipex Developer")
-    page.get_by_label("Street address").fill("100 Platform Way")
-    page.get_by_label("City").fill("Cloud City")
-    page.get_by_label("Postal code").fill("10001")
-    page.get_by_role("button", name="Place order").click()
-
-    expect(page).to_have_url(re.compile(r"/orders/VPX-1001$"))
-    expect(page.get_by_role("heading", name="Order confirmed")).to_be_visible()
-    expect(page.get_by_test_id("order-id")).to_have_text("VPX-1001")
+    confirmation.expect_confirmed_order(order_id="VPX-1001", total="$49.00")
