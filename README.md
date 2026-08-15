@@ -12,6 +12,7 @@ communities.
 ![Playwright](https://img.shields.io/badge/Playwright-Python-2EAD33?logo=playwright&logoColor=white)
 ![Test Runner](https://img.shields.io/badge/Test%20Runner-pytest-0A9EDC?logo=pytest&logoColor=white)
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue)
+[![Quality Gates](https://github.com/vaipexlabs/playwright-lab-01-enterprise-test-automation-foundation/actions/workflows/quality-gates.yaml/badge.svg)](https://github.com/vaipexlabs/playwright-lab-01-enterprise-test-automation-foundation/actions/workflows/quality-gates.yaml)
 
 [Project Intent](#project-intent) ·
 [Target Experience](#target-experience) ·
@@ -20,6 +21,7 @@ communities.
 [Run the Browser Journey](#run-the-browser-journey) ·
 [Test Architecture](#test-architecture) ·
 [Failure Evidence](#failure-evidence) ·
+[Continuous Integration](#continuous-integration) ·
 [Delivery Roadmap](#delivery-roadmap) ·
 [Toolchain](#toolchain) ·
 [Contributing](#contributing)
@@ -234,6 +236,34 @@ Open the latest HTML report in a browser, or inspect a trace with:
 
 Generated reports and browser evidence are ignored by Git.
 
+## Continuous Integration
+
+Run the complete local gate before submitting a change:
+
+```bash
+./scripts/quality-gate.sh
+```
+
+GitHub Actions applies the same contract on pushes to `main`, pull requests,
+and manual workflow runs:
+
+| Job | Gate |
+| --- | --- |
+| Fast Quality Gate | Locked setup, formatting, linting, and 10 fast tests |
+| Browser Quality Gate | Chromium dependencies and four parallel Playwright journeys |
+| Quality Gate | One stable required-check result across both execution jobs |
+
+Fast-test JUnit results and browser HTML/JUnit reports are retained for 14
+days. Screenshots, traces, and videos are uploaded when the browser job fails.
+Workflow permissions are read-only, action dependencies are pinned to immutable
+commit SHAs, and redundant runs on the same branch are cancelled.
+
+The final `Quality Gate` check is ready to be selected as a required status
+check in the repository's `main` branch protection settings.
+
+Dependabot proposes grouped weekly updates for Python and GitHub Actions
+dependencies. Every proposal must pass the same quality gates.
+
 ## Delivery Roadmap
 
 - [x] Establish repository purpose, licensing, and contribution baseline.
@@ -243,7 +273,7 @@ Generated reports and browser evidence are ignored by Git.
 - [x] Introduce reusable configuration, fixtures, and page abstractions.
 - [x] Add authentication, test-data, and parallel-execution patterns.
 - [x] Produce reports, traces, screenshots, and failure evidence.
-- [ ] Add continuous integration and enforceable quality gates.
+- [x] Add continuous integration and enforceable quality gates.
 - [ ] Publish the two-minute demo and operating guidance.
 
 Each milestone is intentionally small and independently reviewable.
@@ -268,6 +298,7 @@ environment is pinned in `requirements.lock`.
 ```text
 src/vaipex_store/   FastAPI routes, templates, and application styling
 scripts/            Reproducible setup and local startup commands
+.github/             Quality-gate workflow and dependency automation
 artifacts/          Generated failure screenshots, traces, and videos (ignored)
 reports/            Generated HTML and JUnit reports (ignored)
 tests/unit/         Fast application-contract tests

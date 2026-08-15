@@ -1,0 +1,118 @@
+name: Quality Gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-gates-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fast-quality-gate:
+    name: Fast Quality Gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: requirements.lock
+
+      - name: Install the locked toolchain
+        run: ./scripts/setup.sh
+
+      - name: Verify formatting
+        run: .venv/bin/ruff format --check .
+
+      - name: Enforce lint rules
+        run: .venv/bin/ruff check .
+
+      - name: Run fast tests
+        run: |
+          mkdir -p reports
+          .venv/bin/pytest tests/unit --junitxml=reports/unit-junit.xml
+
+      - name: Publish fast-test results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fast-test-results
+          path: reports/unit-junit.xml
+          if-no-files-found: error
+          retention-days: 14
+
+  browser-quality-gate:
+    name: Browser Quality Gate
+    needs: fast-quality-gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: requirements.lock
+
+      - name: Install the locked toolchain
+        run: ./scripts/setup.sh
+
+      - name: Install Chromium and operating-system dependencies
+        env:
+          PLAYWRIGHT_WITH_DEPS: "1"
+        run: ./scripts/install-browsers.sh
+
+      - name: Run parallel browser journeys
+        env:
+          PLAYWRIGHT_WORKERS: "2"
+        run: ./scripts/test-e2e.sh
+
+      - name: Publish browser-test reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-test-reports
+          path: reports/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish failure evidence
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-failure-evidence
+          path: artifacts/playwright/
+          if-no-files-found: warn
+          retention-days: 14
+
+  quality-gate:
+    name: Quality Gate
+    if: always()
+    needs: [fast-quality-gate, browser-quality-gate]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Enforce all required gates
+        env:
+          FAST_RESULT: ${{ needs.fast-quality-gate.result }}
+          BROWSER_RESULT: ${{ needs.browser-quality-gate.result }}
+        run: |
+          if [[ "${FAST_RESULT}" != "success" || "${BROWSER_RESULT}" != "success" ]]; then
+            echo "Fast gate: ${FAST_RESULT}"
+            echo "Browser gate: ${BROWSER_RESULT}"
+            exit 1
+          fi
+          echo "All required quality gates passed."
