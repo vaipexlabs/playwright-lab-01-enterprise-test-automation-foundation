@@ -1,9 +1,9 @@
 # Vaipex Playwright Enterprise Test Automation Foundation
 
-An open reference implementation for building reliable, maintainable, and
-operable browser automation with Playwright and Python. It provides a supported
-foundation that development and quality engineering teams can adopt, extend,
-and run consistently from a workstation or continuous integration pipeline.
+An open reference implementation for delivering reliable, maintainable, and
+operable browser automation with Playwright and Python. It gives development
+and quality engineering teams one supported way to configure, execute,
+diagnose, and govern browser journeys locally and in continuous integration.
 
 Developed by **Vaipex Labs** for the developer and quality engineering
 communities.
@@ -14,176 +14,111 @@ communities.
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue)
 [![Quality Gates](https://github.com/vaipexlabs/playwright-lab-01-enterprise-test-automation-foundation/actions/workflows/quality-gates.yaml/badge.svg)](https://github.com/vaipexlabs/playwright-lab-01-enterprise-test-automation-foundation/actions/workflows/quality-gates.yaml)
 
-[Project Intent](#project-intent) ·
-[Target Experience](#target-experience) ·
-[Reference Application](#reference-application) ·
-[Run Locally](#run-locally) ·
-[Run the Browser Journey](#run-the-browser-journey) ·
-[Test Architecture](#test-architecture) ·
+[What It Delivers](#what-it-delivers) ·
+[How It Works](#how-it-works) ·
+[Architecture](#architecture) ·
+[Two-Minute Demo](#two-minute-demo) ·
+[Run Modes](#run-modes) ·
 [Failure Evidence](#failure-evidence) ·
 [Continuous Integration](#continuous-integration) ·
-[Delivery Roadmap](#delivery-roadmap) ·
-[Toolchain](#toolchain) ·
-[Contributing](#contributing)
+[Operate and Extend](#operate-and-extend)
 
-## Project Intent
+## What It Delivers
 
-Browser tests often begin as isolated scripts and become difficult to operate
-as the suite grows. This project demonstrates how to provide Playwright as an
-engineering capability with consistent structure, configuration, execution,
-evidence, and quality controls.
+- A deterministic FastAPI storefront owned by the test suite.
+- Business-readable browser journeys backed by reusable page objects.
+- Validated configuration, deterministic test data, and reusable fixtures.
+- Worker-owned applications and fresh browser contexts for parallel isolation.
+- Authentication-state reuse without committing credentials or session data.
+- Web-first assertions and stable, user-facing locators.
+- Failure-only screenshots, traces, and videos plus HTML and JUnit reports.
+- One quality contract for workstations, pull requests, and the main branch.
+- Pinned dependencies, read-only CI permissions, and automated update proposals.
 
-The completed reference implementation will demonstrate:
+## How It Works
 
-- A maintainable Python and Pytest project structure.
-- Reusable browser, context, configuration, and test-data fixtures.
-- Reliable locators and web-first assertions.
-- Page and component abstractions that preserve test intent.
-- Authentication-state reuse without committing credentials.
-- Parallel-safe tests with deterministic setup and cleanup.
-- Failure evidence through traces, screenshots, video, and reports.
-- Consistent local and GitHub Actions execution.
-- A concise two-minute demonstration for adopters.
+A developer declares the environment and scenario intent. The foundation
+creates an isolated context, exercises the customer journey, captures
+actionable evidence, and turns the result into a delivery quality decision.
 
-## Target Experience
+![Vaipex Playwright enterprise test automation flow](docs/images/vaipex-playwright-flow.svg)
 
-The intended developer journey is:
+## Architecture
 
-```text
-Clone repository
-      ↓
-Install the supported toolchain
-      ↓
-Run one command
-      ↓
-Execute isolated browser journeys
-      ↓
-Inspect results and failure evidence
-      ↓
-Apply the same quality gate in CI
+Developers and GitHub Actions invoke the same Python control layer. Pytest and
+xdist orchestrate isolated Playwright contexts against the self-contained
+Vaipex Store, while the artifact recorder supplies reports and diagnostics to
+a stable quality gate.
+
+![Vaipex Playwright technical architecture](docs/images/vaipex-playwright-architecture.svg)
+
+## Two-Minute Demo
+
+Prerequisites are Python 3.12 and network access for the first dependency and
+browser download. Clone the repository and run:
+
+```bash
+./scripts/two-minute-demo.sh
+```
+
+The demo:
+
+1. Reconciles and verifies the fully pinned Python toolchain.
+2. Enforces formatting and lint rules and runs 10 fast contract tests.
+3. Runs four isolated Chromium journeys across two parallel workers.
+4. Verifies the HTML and JUnit evidence and prints the quality decision.
+
+A warm run completes in about two minutes; the first run may take longer while
+Chromium and Python dependencies are downloaded. Open the resulting report:
+
+```bash
+open reports/playwright.html          # macOS
+xdg-open reports/playwright.html      # Linux
 ```
 
 ## Reference Application
 
-The repository includes **Vaipex Store**, a compact FastAPI commerce
-application designed specifically for deterministic automation. It provides:
+The repository includes **Vaipex Store**, a compact commerce application built
+for deterministic automation. It provides login, catalog search, cart,
+checkout, confirmation, health, catalog, and test-only reset interfaces.
+Owning the target avoids external-site changes, rate limits, and shared data.
 
-- Demo authentication and session behavior.
-- A searchable product catalog.
-- Cart, checkout, and order-confirmation journeys.
-- Validation and unauthorized-access scenarios.
-- Health and catalog APIs.
-- A test-only state-reset API that is disabled unless test mode is explicit.
-- Accessible labels, semantic landmarks, and stable test attributes.
-
-Owning the test target keeps this reference implementation independent of
-external websites, rate limits, shared data, and unannounced UI changes.
-
-## Run Locally
-
-Python 3.12 is required. Start the complete application with:
+Explore it manually:
 
 ```bash
 ./scripts/start-app.sh
 ```
 
-The first run creates `.venv` and installs the complete dependency set pinned
-in `requirements.lock`. Later commands automatically reconcile `.venv` whenever
-that lock changes. Open [http://127.0.0.1:8000](http://127.0.0.1:8000) and use:
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000) and use the local demo
+identity `demo@vaipex.io` with password `vaipex-demo`. Stop it with `Ctrl+C`.
 
-```text
-Email:    demo@vaipex.io
-Password: vaipex-demo
-```
-
-Stop the application with `Ctrl+C`. To validate the application without a
-browser:
+## Run Modes
 
 ```bash
-.venv/bin/pytest tests/unit
-.venv/bin/ruff check .
-```
-
-## Run the Browser Journey
-
-Execute the first complete Playwright journey with one command:
-
-```bash
-# Fast headless execution
+# Fast headless execution with two parallel workers
 ./scripts/test-e2e.sh
 
-# Watch the browser execute each step
+# Watch the journeys in Chromium
 ./scripts/test-e2e.sh --headed
 
-# Pause and inspect the journey with Playwright Inspector
+# Pause and inspect with Playwright Inspector
 ./scripts/test-e2e.sh --debug
 ```
 
-Headed mode uses a 500 ms delay between Playwright operations so the journey is
-easy to follow. Override it when needed, for example:
+Headed mode adds a visible 500 ms delay. Change the display speed or headless
+concurrency without editing code:
 
 ```bash
 PLAYWRIGHT_SLOW_MO=1000 ./scripts/test-e2e.sh --headed
-```
-
-The command installs the pinned Chromium build when necessary and runs four
-independent scenarios across two parallel workers:
-
-1. Invalid credentials are rejected with an actionable error.
-2. A complete sign-in, cart, and Starter Kit checkout succeeds.
-3. A previously authenticated customer can search the catalog.
-4. A previously authenticated customer can purchase the Field Guide.
-
-Each worker starts an isolated application, resets its own state, and stops the
-application automatically. Change concurrency without editing code:
-
-```bash
 PLAYWRIGHT_WORKERS=4 ./scripts/test-e2e.sh
 ```
 
-Every normal run writes:
+The four independent scenarios cover rejected credentials, a complete
+sign-in-to-checkout journey, authenticated catalog search, and an authenticated
+purchase. Every worker owns its application and data, so parallel execution is
+repeatable.
 
-- A self-contained report to `reports/playwright.html`.
-- A machine-readable report to `reports/junit.xml`.
-- Failure-only browser evidence beneath `artifacts/playwright/`.
-
-## Test Architecture
-
-The browser suite separates business intent from UI mechanics and environment
-operation:
-
-```text
-Business-readable test
-        ↓
-Page objects and web-first assertions
-        ↓
-Configured Playwright page
-        ↓
-Environment and lifecycle fixtures
-        ↓
-Vaipex Store or a compatible target environment
-```
-
-| Layer | Responsibility |
-| --- | --- |
-| `tests/e2e/` | Describe the customer outcome being validated |
-| `tests/e2e/conftest.py` | Start or connect to the application and reset test state |
-| `tests/pages/` | Encapsulate locators, interactions, and page-level assertions |
-| `tests/config.py` | Validate URLs, credentials, shipping data, and timeouts |
-| `tests/data.py` | Generate deterministic, worker-specific scenario data |
-| `tests/conftest.py` | Configure browser pages and reusable test-data fixtures |
-
-Authentication is performed once per worker. Playwright saves the resulting
-browser storage state in that worker's temporary directory, and authenticated
-tests create fresh contexts from it. Storage state is never written into the
-repository.
-
-Test data is derived from the worker ID and scenario name. Repeated runs remain
-predictable, while parallel workers receive distinct names, addresses, and
-postal codes.
-
-The defaults run entirely locally. A compatible environment can be selected
-without changing test code:
+Point the same suite at a compatible environment:
 
 ```bash
 VAIPEX_BASE_URL=https://store.example.test \
@@ -192,123 +127,100 @@ VAIPEX_DEMO_PASSWORD='replace-me' \
 ./scripts/test-e2e.sh
 ```
 
-Supported configuration:
+## Test Design
 
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `VAIPEX_BASE_URL` | Dynamically started local app | Target environment |
-| `VAIPEX_EXPECT_TIMEOUT_MS` | `5000` | Assertion and navigation timeout |
-| `VAIPEX_DEMO_EMAIL` | `demo@vaipex.io` | Test-user identity |
-| `VAIPEX_DEMO_PASSWORD` | `vaipex-demo` | Test-user credential |
-| `VAIPEX_SHIPPING_NAME` | `Vaipex Developer` | Checkout recipient |
-| `VAIPEX_SHIPPING_STREET` | `100 Platform Way` | Checkout street |
-| `VAIPEX_SHIPPING_CITY` | `Cloud City` | Checkout city |
-| `VAIPEX_SHIPPING_POSTAL_CODE` | `10001` | Checkout postal code |
+| Layer | Responsibility |
+| --- | --- |
+| `tests/e2e/` | Express customer outcomes as browser journeys |
+| `tests/pages/` | Encapsulate stable locators, interactions, and assertions |
+| `tests/e2e/conftest.py` | Manage applications, reset state, and authenticated contexts |
+| `tests/config.py` | Validate environment, credentials, and timeouts |
+| `tests/data.py` | Generate deterministic, worker-specific scenario data |
+| `tests/conftest.py` | Configure browser pages and shared data fixtures |
+
+Authentication occurs once per worker. Each authenticated test receives a
+fresh browser context initialized from temporary storage state. Nothing is
+written into the repository, and scenario identities remain distinct across
+parallel workers.
 
 ## Failure Evidence
 
-Playwright retains diagnostics only when a browser test fails:
+Normal runs produce `reports/playwright.html` and `reports/junit.xml`.
+Playwright retains these additional diagnostics only for failed tests:
 
-| Evidence | Purpose |
+| Evidence | Diagnostic value |
 | --- | --- |
-| Screenshot (`.png`) | Show the browser's final visible state |
-| Trace (`.zip`) | Replay actions, DOM snapshots, console, network, and timing |
-| Video (`.webm`) | Show the complete failed browser journey |
-| HTML report | Provide a human-readable suite result |
-| JUnit XML | Integrate results with CI and quality systems |
+| Screenshot | Final visible browser state |
+| Trace | Replayable actions, DOM, console, network, and timing |
+| Video | Complete failed browser journey |
+| HTML report | Human-readable suite result |
+| JUnit XML | Machine-readable quality result |
 
-Prove the behavior safely with:
+Prove the evidence pipeline safely:
 
 ```bash
 ./scripts/demonstrate-failure.sh
-```
-
-The script runs one intentionally incorrect assertion. It succeeds only when
-the expected test failure produces all five forms of evidence, and stores that
-run beneath timestamped `artifacts/failure-demo/` and
-`reports/failure-demo/` directories.
-
-Open the latest HTML report in a browser, or inspect a trace with:
-
-```bash
 .venv/bin/playwright show-trace path/to/trace.zip
 ```
 
-Generated reports and browser evidence are ignored by Git.
+The demonstration succeeds only when its intentional assertion failure creates
+all five evidence types. Generated evidence is ignored by Git.
 
 ## Continuous Integration
 
-Run the complete local gate before submitting a change:
+Run the complete delivery gate locally:
 
 ```bash
 ./scripts/quality-gate.sh
 ```
 
-GitHub Actions applies the same contract on pushes to `main`, pull requests,
-and manual workflow runs:
+GitHub Actions applies the same contract to pushes, pull requests, and manual
+runs:
 
-| Job | Gate |
+| Job | Enforced gate |
 | --- | --- |
 | Fast Quality Gate | Locked setup, formatting, linting, and 10 fast tests |
-| Browser Quality Gate | Chromium dependencies and four parallel Playwright journeys |
-| Quality Gate | One stable required-check result across both execution jobs |
+| Browser Quality Gate | Chromium plus four parallel browser journeys |
+| Quality Gate | One stable required-check result across both jobs |
 
-Fast-test JUnit results and browser HTML/JUnit reports are retained for 14
-days. Screenshots, traces, and videos are uploaded when the browser job fails.
-Workflow permissions are read-only, action dependencies are pinned to immutable
-commit SHAs, and redundant runs on the same branch are cancelled.
-
-The final `Quality Gate` check is ready to be selected as a required status
-check in the repository's `main` branch protection settings.
-
-Dependabot proposes grouped weekly updates for Python and GitHub Actions
-dependencies. Every proposal must pass the same quality gates.
-
-## Delivery Roadmap
-
-- [x] Establish repository purpose, licensing, and contribution baseline.
-- [x] Add the pinned Python and Playwright toolchain.
-- [x] Deliver the deterministic Vaipex Store reference application.
-- [x] Implement the first deterministic browser journey.
-- [x] Introduce reusable configuration, fixtures, and page abstractions.
-- [x] Add authentication, test-data, and parallel-execution patterns.
-- [x] Produce reports, traces, screenshots, and failure evidence.
-- [x] Add continuous integration and enforceable quality gates.
-- [ ] Publish the two-minute demo and operating guidance.
-
-Each milestone is intentionally small and independently reviewable.
+Reports are retained for 14 days, and browser diagnostics are uploaded on
+failure. Workflow permissions are read-only, actions are pinned to immutable
+commit SHAs, redundant branch runs are cancelled, and Dependabot proposes
+grouped weekly dependency updates.
 
 ## Toolchain
 
 | Tool | Role |
 | --- | --- |
 | Python | Automation language |
-| Playwright for Python | Browser automation across Chromium, Firefox, and WebKit |
+| FastAPI | Deterministic reference application |
+| Playwright for Python | Browser automation runtime |
 | Pytest | Test runner, fixtures, markers, and assertions |
-| pytest-xdist | Parallel test execution |
-| Ruff | Python linting and formatting |
-| pytest-html and JUnit XML | Human-readable and machine-readable test reporting |
-| GitHub Actions | Repeatable continuous test execution |
+| pytest-xdist | Parallel worker orchestration |
+| Ruff | Formatting and linting |
+| pytest-html and JUnit XML | Human and machine-readable reporting |
+| GitHub Actions | Continuous quality-gate enforcement |
 
 Direct dependencies are declared in `pyproject.toml`; the complete transitive
 environment is pinned in `requirements.lock`.
 
-## Repository Structure
+## Operate and Extend
+
+The [operating guide](docs/operations.md) covers execution modes, compatible
+environments, evidence handling, troubleshooting, security, and the supported
+way to extend the suite.
 
 ```text
-src/vaipex_store/   FastAPI routes, templates, and application styling
-scripts/            Reproducible setup and local startup commands
-.github/             Quality-gate workflow and dependency automation
-artifacts/          Generated failure screenshots, traces, and videos (ignored)
-reports/            Generated HTML and JUnit reports (ignored)
-tests/unit/         Fast application-contract tests
-tests/e2e/          Business-readable Playwright browser journeys
-tests/pages/        Reusable page interactions and UI assertions
-tests/config.py     Validated environment and test-data configuration
-tests/data.py       Deterministic, parallel-safe scenario data
-tests/conftest.py   Shared browser and test-data fixtures
-pyproject.toml      Python package, dependency, Pytest, and Ruff configuration
-requirements.lock  Fully resolved runtime and test dependency versions
+src/vaipex_store/   Deterministic FastAPI application
+scripts/            Setup, execution, demonstration, and quality-gate commands
+.github/             CI quality gate and dependency automation
+docs/                Operating guidance and Vaipex illustrations
+tests/unit/          Fast application and configuration contracts
+tests/e2e/           Business-readable Playwright journeys
+tests/pages/         Reusable page interactions and UI assertions
+tests/config.py      Validated environment configuration
+tests/data.py        Deterministic, parallel-safe scenario data
+tests/conftest.py    Shared browser and data fixtures
 ```
 
 ## Contributing
