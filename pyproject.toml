@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools==84.0.0"]
+requires = ["setuptools==84.2.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -11,22 +11,22 @@ requires-python = ">=3.12,<3.13"
 license = "Apache-2.0"
 authors = [{ name = "Vaipex Labs", email = "vaipex.labs@gmail.com" }]
 dependencies = [
-  "fastapi==0.141.1",
+  "fastapi==0.161.1",
   "itsdangerous==2.2.0",
   "jinja2==3.1.6",
   "python-multipart==0.0.32",
-  "uvicorn==0.53.0",
+  "uvicorn==0.54.0",
 ]
 
 [project.optional-dependencies]
 test = [
-  "httpx2==2.13.0",
-  "playwright==1.63.0",
+  "httpx2==2.16.0",
+  "playwright==1.64.1",
   "pytest==9.1.1",
   "pytest-html==4.2.0",
-  "pytest-playwright==0.9.0",
+  "pytest-playwright==0.10.0",
   "pytest-xdist==3.8.0",
-  "ruff==0.16.8",
+  "ruff==0.17.2",
 ]
 
 [tool.setuptools.packages.find]
